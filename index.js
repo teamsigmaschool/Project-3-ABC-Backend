@@ -72,6 +72,40 @@ app.post('/posts', async (req, res) => {
     }
 });
 
+app.patch('/posts/:id', async (req, res) => {
+  const { title, content } = req.body;
+  try {
+    const result = await pool.query(
+      `UPDATE posts SET title = COALESCE($1, title), content = COALESCE($2, content)
+       WHERE id = $3 AND user_id = $4 RETURNING *`,
+      [title, content, req.params.id, req.user.userId]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Post not found, or not yours to edit' });
+    }
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Something went wrong' });
+  }
+});
+
+app.delete('/posts/:id', async (req, res) => {
+  try {
+    const result = await pool.query(
+      'DELETE FROM posts WHERE id = $1 AND user_id = $2 RETURNING *',
+      [req.params.id, req.user.userId]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Post not found, or not yours to delete' });
+    }
+    res.json({ deleted: result.rows[0] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Something went wrong' });
+  }
+});
+
 app.use((req, res) => {
     res.status(404).json({ error: 'Route not found' });
 });
