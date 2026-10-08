@@ -18,9 +18,9 @@ CREATE TABLE IF NOT EXISTS abc_posts (
     content TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
-ALTER TABLE posts
+ALTER TABLE abc_posts
     ADD COLUMN user_id INT,
-    ADD CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(id);
+    ADD CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES abc_users(id);
 INSERT INTO abc_users (username, password)
 VALUES
     ('john123', 'password123'),
