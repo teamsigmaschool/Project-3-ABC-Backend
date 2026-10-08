@@ -47,9 +47,9 @@ app.post('/login', async (req, res) => {
 app.get('/posts', async (req, res) => {
     try {
         const result = await pool.query(
-            `SELECT posts.id, posts.title, posts.content, posts.created_at, users.username AS author
-       FROM posts JOIN abc_users ON posts.user_id = users.id
-       ORDER BY posts.created_at DESC`
+            `SELECT abc_posts.id, abc_posts.title, abc_posts.content, abc_posts.created_at, abc_users.username AS author
+       FROM abc_posts JOIN abc_users ON abc_posts.user_id = abc_users.id
+       ORDER BY abc_posts.created_at DESC`
         );
         res.json(result.rows);
     } catch (err) {
@@ -62,7 +62,7 @@ app.post('/posts', async (req, res) => {
     const { title, content, user_id } = req.body;
     try {
         const result = await pool.query(
-            'INSERT INTO posts (title, content, user_id) VALUES ($1, $2, $3) RETURNING *',
+            'INSERT INTO abc_posts (title, content, user_id) VALUES ($1, $2, $3) RETURNING *',
             [title, content, user_id]
         );
         res.status(201).json(result.rows[0]);
@@ -76,7 +76,7 @@ app.patch('/posts/:id', async (req, res) => {
   const { title, content } = req.body;
   try {
     const result = await pool.query(
-      `UPDATE posts SET title = COALESCE($1, title), content = COALESCE($2, content)
+      `UPDATE abc_posts SET title = COALESCE($1, title), content = COALESCE($2, content)
        WHERE id = $3 AND user_id = $4 RETURNING *`,
       [title, content, req.params.id, req.user.userId]
     );
@@ -93,7 +93,7 @@ app.patch('/posts/:id', async (req, res) => {
 app.delete('/posts/:id', async (req, res) => {
   try {
     const result = await pool.query(
-      'DELETE FROM posts WHERE id = $1 AND user_id = $2 RETURNING *',
+      'DELETE FROM abc_posts WHERE id = $1 AND user_id = $2 RETURNING *',
       [req.params.id, req.user.userId]
     );
     if (result.rows.length === 0) {
