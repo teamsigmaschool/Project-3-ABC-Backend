@@ -17,7 +17,7 @@ app.post('/signup', async (req, res) => {
     const { username, password } = req.body;
     try {
         const result = await pool.query(
-            'INSERT INTO users (username, password) VALUES ($1, $2) RETURNING id, username',
+            'INSERT INTO abc_users (username, password) VALUES ($1, $2) RETURNING id, username',
             [username, password]
         );
         res.status(201).json(result.rows[0]);
@@ -31,7 +31,7 @@ app.post('/login', async (req, res) => {
     const { username, password } = req.body;
     try {
         const result = await pool.query(
-            'SELECT id, username FROM users WHERE username = $1 AND password = $2',
+            'SELECT id, username FROM abc_users WHERE username = $1 AND password = $2',
             [username, password]
         );
         if (result.rows.length === 0) {
@@ -48,7 +48,7 @@ app.get('/posts', async (req, res) => {
     try {
         const result = await pool.query(
             `SELECT posts.id, posts.title, posts.content, posts.created_at, users.username AS author
-       FROM posts JOIN users ON posts.user_id = users.id
+       FROM posts JOIN abc_users ON posts.user_id = users.id
        ORDER BY posts.created_at DESC`
         );
         res.json(result.rows);
